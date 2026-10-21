@@ -74,6 +74,13 @@ class BundleTests(unittest.TestCase):
             with self.assertRaisesRegex(DefinitionError, "symlinks"):
                 pack(root, "software", "v001", "bedrock_converse:test")
 
+    def test_pack_rejects_symlinked_profile_root(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "profile").symlink_to(REPO / "examples/software/profile", target_is_directory=True)
+            with self.assertRaisesRegex(DefinitionError, "symlinks"):
+                pack(root, "software", "v001", "bedrock_converse:test")
+
 
 class PublisherTests(unittest.TestCase):
     def test_conditional_upload_is_idempotent_and_manifest_is_last(self):

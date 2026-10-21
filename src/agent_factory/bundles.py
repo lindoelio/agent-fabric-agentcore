@@ -187,13 +187,16 @@ def atomic_json(path: Path, value: dict) -> None:
 
 def pack(source: Path, team: str, version: str, model: str) -> tuple[bytes, dict[str, bytes]]:
     source = source.resolve()
+    if (source / "profile").is_symlink():
+        raise DefinitionError("Release symlinks are not allowed.")
     files: dict[str, bytes] = {}
     for path in sorted((source / "profile").rglob("*")):
         if path.is_symlink():
             raise DefinitionError("Release symlinks are not allowed.")
         if path.is_file():
             relative = safe_path(path.relative_to(source).as_posix())
-            data = path.read_bytes()
+            with path.open("rb") as stream:
+                data = stream.read(MAX_FILE_BYTES + 1)
             if len(data) > MAX_FILE_BYTES:
                 raise DefinitionError("Release file is too large.")
             files[relative] = data

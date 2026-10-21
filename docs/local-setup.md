@@ -1,15 +1,9 @@
 # Ambiente local e origem do código
 
-O projeto foi recuperado da conversa [Viabilidade do dcode no AWS](https://chatgpt.com/c/6ad7f1a4-58d0-83e8-9280-410c621827ab), no ChatGPT Work.
-O nome original é `agent-factory-agentcore`; o diretório local solicitado é
-`/Users/lindoelio/Projects/agent-fabric-agentcore`.
-
-O download do ZIP não foi concluído pelo navegador. Os 31 arquivos foram recuperados
-dos registros completos de criação e alteração da tarefa
-`01a15b88-2f60-75db-b21f-8b7fc4d3300e`, em ordem, com conferência dos trechos anteriores
-em cada atualização. O commit local `f632fe2` preserva essa importação: 31 arquivos e
-1.859 linhas, os mesmos totais do commit original `f691eff` registrados na conversa.
-O histórico Git remoto e o ZIP não foram transferidos.
+O projeto foi iniciado no ChatGPT Work como `agent-factory-agentcore` e importado
+para este repositório como `agent-fabric-agentcore`. A importação preservou 31 arquivos
+e 1.859 linhas de código e documentação. O histórico de origem e a evidência de
+recuperação permanecem no ambiente local do autor.
 
 Depois da importação, foi ajustada a expectativa de caminho de um teste para o macOS
 (`/tmp` resolve para `/private/tmp`) e aplicada a formatação padrão do Terraform.
@@ -36,14 +30,14 @@ terraform -chdir=infra validate
 uv pip check --python .venv/bin/python
 ```
 
-Resultado: 12 testes passaram, incluindo inicialização ACP, criação de sessão e
+Resultado da configuração inicial: 12 testes passaram, incluindo inicialização ACP, criação de sessão e
 retomada com o dcode real, sem enviar prompt ao modelo. Terraform válido e
 dependências compatíveis. O serviço Uvicorn também foi iniciado em loopback;
 `GET /ping` respondeu `Healthy` e `POST /invocations` com `action=describe` retornou
 o protocolo esperado. O servidor foi encerrado após essa verificação.
 
-Build da imagem Docker, autenticação AWS, invocação de modelo, publicação no S3/ECR,
-provisionamento e publicação no GitHub ainda não foram executados nesta importação.
+Essa configuração inicial foi seguida da revisão para publicação. Os resultados
+atuais e as validações ainda pendentes estão em [validation.md](validation.md).
 
 ## Retomar o desenvolvimento
 

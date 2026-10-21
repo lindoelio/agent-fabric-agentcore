@@ -8,10 +8,10 @@ Uma imagem genérica atende várias equipes. Para criar uma equipe, publique um 
 prefixo no S3 com o agente principal, subagentes, skills e configuração MCP. Cada
 sessão fica vinculada a uma versão e tem seu próprio workspace e perfil do dcode.
 
-**Status: implementação inicial, com testes locais da integração usando um processo
-ACP de teste. Não foi feito deploy AWS, build Docker ou chamada real de modelo neste
-ambiente.** A CI inclui validação Terraform, build ARM64 e teste de contrato com o
-dcode real, sem chamada ao modelo. Confira os resultados da CI antes do primeiro deploy.
+**Status: MVP com verificação local de dcode real (inicialização e retomada ACP),
+transporte WebSocket e Terraform.** A CI também constrói e testa a imagem ARM64.
+Provisionamento AWS, persistência no AgentCore e chamadas reais a modelos ainda
+precisam de validação no ambiente de destino. Veja [as evidências e limites](docs/validation.md).
 
 ## Arquitetura
 
@@ -249,6 +249,7 @@ AgentCore; ajuste a política de retenção na sua conta.
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -v
+FACTORY_TEST_REAL_DCODE=1 FACTORY_TEST_TRANSPORT=1 python -m unittest discover -s tests -v
 terraform -chdir=infra fmt -check
 terraform -chdir=infra init -backend=false
 terraform -chdir=infra validate

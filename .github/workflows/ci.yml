@@ -24,7 +24,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: '1.10.5'
-      - run: terraform -chdir=infra fmt -recursive
+      - run: terraform -chdir=infra fmt -check -recursive
       - run: terraform -chdir=infra init -backend=false
       - run: terraform -chdir=infra validate
   dcode-contract:
@@ -37,6 +37,8 @@ jobs:
       - run: pip install '.[agent,client]'
       - name: Real dcode ACP startup (no model invocation)
         run: PYTHONPATH=src FACTORY_TEST_REAL_DCODE=1 python -m unittest discover -s tests -p test_dcode_contract.py -v
+      - name: WebSocket transport and SDK authentication headers (no AWS calls)
+        run: PYTHONPATH=src FACTORY_TEST_TRANSPORT=1 python -m unittest discover -s tests -p test_transport.py -v
   container:
     runs-on: ubuntu-latest
     steps:
@@ -48,6 +50,18 @@ jobs:
           context: .
           platforms: linux/arm64
           push: false
+          load: true
+          tags: agent-fabric-agentcore:verify
           provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Verify image runtime, ACP, and WebSocket transport offline
+        run: |
+          docker run --rm --network none \
+            -v "$PWD/tests:/validation/tests:ro" \
+            -v "$PWD/examples:/validation/examples:ro" \
+            -e PYTHONPATH=/validation/tests \
+            -e FACTORY_TEST_REAL_DCODE=1 -e FACTORY_TEST_TRANSPORT=1 \
+            -e AWS_EC2_METADATA_DISABLED=true \
+            agent-fabric-agentcore:verify \
+            python -m unittest discover -s /validation/tests -v

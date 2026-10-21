@@ -12,6 +12,18 @@ from pathlib import Path
 from agent_factory.bundles import DefinitionError, identifier, pack
 
 
+def websocket_headers(headers: dict[str, str]) -> dict[str, str]:
+    """Preserve authentication; let websockets generate its own handshake headers.
+
+    AgentCore's SDK supplies these as unsigned headers. Passing them through
+    additional_headers duplicates Upgrade/Connection/Key and breaks the handshake.
+    Host is generated from the same signed runtime URL by websockets.
+    """
+    owned = {"host", "connection", "upgrade", "user-agent"}
+    return {key: value for key, value in headers.items()
+            if key.lower() not in owned and not key.lower().startswith("sec-websocket-")}
+
+
 def publish(client, bucket: str, prefix: str, files: dict[str, bytes]) -> None:
     """Conditional writes permit idempotent retries, never overwrite a release."""
     for relative, content in files.items():
@@ -98,7 +110,7 @@ async def chat(args):
         url, headers = AgentCoreRuntimeClient(region=args.region).generate_ws_connection(
             runtime_arn=args.runtime_arn, session_id=runtime_session
         )
-    async with websockets.connect(url, additional_headers=headers, max_size=64 * 1024) as ws:
+    async with websockets.connect(url, additional_headers=websocket_headers(headers), max_size=64 * 1024) as ws:
         client = ACPClient(ws)
         await ws.send(json.dumps({"type": "factory.open", "team": args.team, "version": args.version}))
         ready = await client.receive()
