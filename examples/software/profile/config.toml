@@ -1,0 +1,8 @@
+[startup]
+read_project_dotenv = false
+
+[memory]
+auto_save = false
+
+[threads]
+auto_rename = false

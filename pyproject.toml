@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-factory-agentcore"
+version = "0.1.0"
+description = "S3-defined dcode teams on Amazon Bedrock AgentCore Runtime"
+requires-python = ">=3.12"
+dependencies = ["boto3>=1.42,<2", "uvicorn[standard]>=0.35,<1"]
+
+[project.optional-dependencies]
+agent = ["deepagents-code[bedrock]==0.1.87"]
+client = ["websockets>=15,<17", "bedrock-agentcore>=1,<2"]
+
+[project.scripts]
+agent-factory = "agent_factory.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

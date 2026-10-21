@@ -1,0 +1,11 @@
+# Copy to backend.tf and set an existing, dedicated state bucket and region.
+# This file is not loaded by Terraform while its extension is .example.
+terraform {
+  backend "s3" {
+    bucket       = "REPLACE-WITH-TERRAFORM-STATE-BUCKET"
+    key          = "agent-factory/terraform.tfstate"
+    region       = "us-west-2"
+    encrypt      = true
+    use_lockfile = true
+  }
+}

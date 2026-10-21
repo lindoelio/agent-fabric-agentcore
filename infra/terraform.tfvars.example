@@ -1,0 +1,9 @@
+aws_region   = "us-west-2"
+project_name = "agent-factory"
+
+# First apply without runtime_image_uri, build/push the image, then set its digest.
+# runtime_image_uri = "123456789012.dkr.ecr.us-west-2.amazonaws.com/agent-factory-runtime@sha256:<digest>"
+
+session_storage_enabled = true
+idle_timeout_seconds    = 900
+max_lifetime_seconds    = 28800

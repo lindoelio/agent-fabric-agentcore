@@ -1,0 +1,53 @@
+name: Verify
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit and subprocess integration tests (no cloud access)
+        run: PYTHONPATH=src python -m unittest discover -s tests -v
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.10.5'
+      - run: terraform -chdir=infra fmt -recursive
+      - run: terraform -chdir=infra init -backend=false
+      - run: terraform -chdir=infra validate
+  dcode-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install '.[agent,client]'
+      - name: Real dcode ACP startup (no model invocation)
+        run: PYTHONPATH=src FACTORY_TEST_REAL_DCODE=1 python -m unittest discover -s tests -p test_dcode_contract.py -v
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          push: false
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
