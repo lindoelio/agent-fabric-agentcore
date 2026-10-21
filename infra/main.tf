@@ -42,7 +42,7 @@ resource "aws_s3_bucket_policy" "definitions" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Sid = "RequireTLS", Effect = "Deny", Principal = "*", Action = "s3:*"
+      Sid       = "RequireTLS", Effect = "Deny", Principal = "*", Action = "s3:*"
       Resource  = [aws_s3_bucket.definitions.arn, "${aws_s3_bucket.definitions.arn}/*"]
       Condition = { Bool = { "aws:SecureTransport" = "false" } }
     }]
@@ -63,7 +63,7 @@ resource "aws_iam_role" "runtime" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow", Action = "sts:AssumeRole"
+      Effect    = "Allow", Action = "sts:AssumeRole"
       Principal = { Service = "bedrock-agentcore.amazonaws.com" }
       Condition = {
         StringEquals = { "aws:SourceAccount" = local.account_id }
@@ -79,19 +79,19 @@ resource "aws_iam_role_policy" "runtime" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid = "ReadPublishedDefinitions", Effect = "Allow", Action = ["s3:GetObject"]
+        Sid      = "ReadPublishedDefinitions", Effect = "Allow", Action = ["s3:GetObject"]
         Resource = ["${aws_s3_bucket.definitions.arn}/${var.definitions_prefix}/*"]
       },
       {
         Sid = "ECRToken", Effect = "Allow", Action = ["ecr:GetAuthorizationToken"], Resource = "*"
       },
       {
-        Sid = "PullRuntimeImage", Effect = "Allow"
+        Sid      = "PullRuntimeImage", Effect = "Allow"
         Action   = ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer"]
         Resource = [aws_ecr_repository.runtime.arn]
       },
       {
-        Sid = "InvokeConfiguredModels", Effect = "Allow"
+        Sid    = "InvokeConfiguredModels", Effect = "Allow"
         Action = ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"]
         Resource = concat(
           [for id in var.bedrock_model_ids : "arn:${local.partition}:bedrock:*::foundation-model/${id}"],
@@ -99,16 +99,16 @@ resource "aws_iam_role_policy" "runtime" {
         )
       },
       {
-        Sid = "RuntimeLogGroups", Effect = "Allow"
+        Sid      = "RuntimeLogGroups", Effect = "Allow"
         Action   = ["logs:CreateLogGroup", "logs:DescribeLogStreams", "logs:PutResourcePolicy"]
         Resource = [local.log_prefix]
       },
       {
-        Sid = "RuntimeLogEvents", Effect = "Allow", Action = ["logs:CreateLogStream", "logs:PutLogEvents"]
+        Sid      = "RuntimeLogEvents", Effect = "Allow", Action = ["logs:CreateLogStream", "logs:PutLogEvents"]
         Resource = ["${local.log_prefix}:log-stream:*"]
       },
       {
-        Sid = "DescribeLogGroups", Effect = "Allow", Action = ["logs:DescribeLogGroups"]
+        Sid      = "DescribeLogGroups", Effect = "Allow", Action = ["logs:DescribeLogGroups"]
         Resource = ["arn:${local.partition}:logs:${var.aws_region}:${local.account_id}:log-group:*"]
       }
     ]

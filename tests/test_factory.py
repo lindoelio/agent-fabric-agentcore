@@ -106,7 +106,8 @@ class ProtocolTests(unittest.TestCase):
     def test_remote_workspace_and_tools_override_client_requests(self):
         message = client_message(json.dumps({"jsonrpc": "2.0", "id": 1, "method": "session/new",
             "params": {"cwd": "/etc", "mcpServers": [{"command": "untrusted"}]}}), Path("/tmp/project"))
-        self.assertEqual(message["params"], {"cwd": "/tmp/project", "mcpServers": []})
+        # macOS resolves /tmp to /private/tmp; compare the canonical workspace.
+        self.assertEqual(message["params"], {"cwd": str(Path("/tmp/project").resolve()), "mcpServers": []})
         message = client_message('{"jsonrpc":"2.0","id":2,"method":"initialize","params":{"clientCapabilities":{"terminal":true}}}', Path("/tmp"))
         self.assertFalse(message["params"]["clientCapabilities"]["terminal"])
 
